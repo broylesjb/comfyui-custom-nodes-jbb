@@ -7,14 +7,13 @@ COMFYJBB: Load & Process Image Batch node
     * raw camera formats (.arw/.cr2/.cr3/.dng/.nef/.raf/.raw) -> rawpy if available
     * others -> bypass (moved to bypass_path)
 - Moves processed files to processed_path, bypassed files to bypass_path.
-- Outputs: IMAGE tensor, FILENAME_TEXT (string)
+- Outputs: IMAGE tensor, FILENAME_TEXT (string), STATUS_TEXT (string)
 """
 import os
 import shutil
-import hashlib
 import logging
 import random
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from PIL import Image, ImageOps, ImageSequence
 import numpy as np
@@ -32,12 +31,14 @@ COMMON_IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
 HEIC_EXTS = {".heic"}
 RAW_EXTS = {".arw", ".cr2", ".cr3", ".dng", ".nef", ".raf", ".raw"}
 
+
 def _ensure_dir(path: str):
     try:
         os.makedirs(path, exist_ok=True)
     except Exception as e:
         logger.warning(f"Could not create directory {path}: {e}")
         raise
+
 
 def _list_files_in_dir(path: str) -> List[str]:
     try:
@@ -47,6 +48,7 @@ def _list_files_in_dir(path: str) -> List[str]:
     except FileNotFoundError:
         return []
 
+
 def _claim_file_atomic(src: str) -> Optional[str]:
     processing = src + ".processing"
     try:
@@ -54,6 +56,7 @@ def _claim_file_atomic(src: str) -> Optional[str]:
         return processing
     except Exception:
         return None
+
 
 def _finalize_move(src_processing: str, dest_dir: str, original_name: str):
     dest_path = os.path.join(dest_dir, original_name)
@@ -63,7 +66,8 @@ def _finalize_move(src_processing: str, dest_dir: str, original_name: str):
         shutil.copy2(src_processing, dest_path)
         os.remove(src_processing)
 
-def _load_with_inputimpl_or_pillow(path: str):
+
+def _load_with_inputimpl_or_pillow(path: str) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
     dtype = comfy.model_management.intermediate_dtype()
     device = comfy.model_management.intermediate_device()
 
@@ -104,7 +108,8 @@ def _load_with_inputimpl_or_pillow(path: str):
     mask_tensor = torch.cat(output_masks, dim=0).to(device=device) if output_masks else None
     return images_tensor, mask_tensor
 
-def _load_raw_image(path: str):
+
+def _load_raw_image(path: str) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
     try:
         import rawpy
     except Exception:
@@ -117,6 +122,7 @@ def _load_raw_image(path: str):
     dtype = comfy.model_management.intermediate_dtype()
     device = comfy.model_management.intermediate_device()
     return tensor.to(dtype=dtype, device=device), None
+
 
 class LoadAndProcessImageBatch(ComfyNodeABC):
     @classmethod
@@ -134,14 +140,15 @@ class LoadAndProcessImageBatch(ComfyNodeABC):
                 "index": ("INT", {"default": 0, "min": 0}),
                 "seed": ("INT", {"default": 0}),
                 "label": (IO.STRING, {"default": ""}),
-                "dry_run": (["false", "true"], {"default": "false", "tooltip": "If true, do not move files; useful for testing."}),
+                "dry_run": (IO.BOOL, {"default": True, "tooltip": "If true, do not move files; useful for testing."}),
             }
         }
 
-    RETURN_TYPES = ("IMAGE", "STRING")
+    # Outputs: IMAGE tensor, FILENAME_TEXT string, STATUS_TEXT string
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     FUNCTION = "process_next"
     CATEGORY = "image/batch"
-    DESCRIPTION = "COMFYJBB: Load and process image batch queue; routes by extension to appropriate loaders, moves processed files to processed_path or bypass_path."
+    DESCRIPTION = "COMFYJBB: Load and process image batch queue; routes by extension to appropriate loaders, moves processed files to processed_path or bypass_path. Returns IMAGE, filename, and status message."
 
     def _normalize_paths(self, batch_path, processed_path, bypass_path):
         batch_path = os.path.expanduser(batch_path)
@@ -160,7 +167,7 @@ class LoadAndProcessImageBatch(ComfyNodeABC):
             return files[idx]
         return files[0]
 
-    def process_next(self, batch_path: str, processed_path: str, bypass_path: str, mode: str = "incremental", index: int = 0, seed: int = 0, label: str = "", dry_run: str = "false"):
+    def process_next(self, batch_path: str, processed_path: str, bypass_path: str, mode: str = "incremental", index: int = 0, seed: int = 0, label: str = "", dry_run: bool = True):
         batch_path, processed_path, bypass_path = self._normalize_paths(batch_path, processed_path, bypass_path)
         _ensure_dir(batch_path)
         _ensure_dir(processed_path)
@@ -187,37 +194,46 @@ class LoadAndProcessImageBatch(ComfyNodeABC):
         original_name = os.path.basename(chosen)
         ext = os.path.splitext(original_name)[1].lower()
 
+        # status message for downstream
+        status_msg = ""
+
         try:
             if ext in COMMON_IMAGE_EXTS or ext in HEIC_EXTS:
                 # Load from the claimed (processing) file — the original path has been renamed
                 images, mask = _load_with_inputimpl_or_pillow(claimed)
+                status_msg = "processed"
             elif ext in RAW_EXTS:
                 try:
                     images, mask = _load_raw_image(claimed)
+                    status_msg = "processed"
                 except Exception as re:
                     logger.warning(f"RAW load failed for {chosen}: {re}")
-                    if dry_run == "false":
+                    if not dry_run:
                         _finalize_move(claimed, bypass_path, original_name)
-                    raise RuntimeError(f"RAW load failed for {chosen}: {re}") from re
+                    status_msg = f"bypassed: raw load failed: {re}"
+                    return (None, original_name, status_msg)
             else:
                 logger.info(f"Bypassing unknown extension for {chosen}")
-                if dry_run == "false":
+                if not dry_run:
                     _finalize_move(claimed, bypass_path, original_name)
-                raise RuntimeError(f"Bypassed file {chosen} due to unsupported extension {ext}")
+                status_msg = f"bypassed: unsupported extension {ext}"
+                return (None, original_name, status_msg)
 
-            if dry_run == "false":
+            # move processed file to processed_path unless dry_run
+            if not dry_run:
                 _finalize_move(claimed, processed_path, original_name)
 
-            return (images, original_name)
-        except Exception:
-            # Ensure failed processing results in file moved to bypass (if still present)
+            return (images, original_name, status_msg)
+        except Exception as e:
+            # Unexpected error: ensure claimed file is moved to bypass if still present
             try:
-                if os.path.exists(claimed):
-                    if dry_run == "false":
-                        _finalize_move(claimed, bypass_path, original_name)
+                if os.path.exists(claimed) and not dry_run:
+                    _finalize_move(claimed, bypass_path, original_name)
             except Exception as move_err:
                 logger.warning(f"Failed to move failed file {claimed} to bypass: {move_err}")
+            # Re-raise to surface the unexpected error
             raise
+
 
 NODE_CLASS_MAPPINGS = {
     "LoadAndProcessImageBatch": LoadAndProcessImageBatch,
