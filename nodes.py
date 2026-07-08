@@ -40,6 +40,7 @@ class LoadRawImage:
                 ),
             },
             "optional": {
+                "image_path_override": ("STRING", {"default": "", "tooltip": "Optional path override from external node"}),
                 "use_auto_bright": (
                     "BOOLEAN",
                     {"default": True, "tooltip": "automatic increase of brightness"},
@@ -53,25 +54,43 @@ class LoadRawImage:
         }
 
     @classmethod
-    def VALIDATE_INPUTS(cls, image):
-        if not folder_paths.exists_annotated_filepath(image):
-            return "Invalid image file: {}".format(image)
+    def VALIDATE_INPUTS(cls, image, image_path_override=""):
+        # Use override if provided, otherwise use dropdown selection
+        if image_path_override and image_path_override.strip():
+            image_to_validate = image_path_override
+        else:
+            image_to_validate = image
+
+        if not folder_paths.exists_annotated_filepath(image_to_validate):
+            return "Invalid image file: {}".format(image_to_validate)
 
         return True
 
     @classmethod
-    def IS_CHANGED(cls, image):
-        image_path = folder_paths.get_annotated_filepath(image)
+    def IS_CHANGED(cls, image, image_path_override=""):
+        # Use override if provided, otherwise use dropdown selection
+        if image_path_override and image_path_override.strip():
+            image_to_check = image_path_override
+        else:
+            image_to_check = image
+
+        image_path = folder_paths.get_annotated_filepath(image_to_check)
         m = hashlib.sha256()
         with open(image_path, "rb") as f:
             m.update(f.read())
         return m.digest().hex()
 
     def load_img(
-        self, image, use_auto_bright=True, bright_adjustment=1.0, highlight_mode="clip"
+        self, image, image_path_override="", use_auto_bright=True, bright_adjustment=1.0, highlight_mode="clip"
     ):
         """Load a raw image."""
-        image_path = folder_paths.get_annotated_filepath(image)
+        # Use override if provided and valid, otherwise use dropdown selection
+        if image_path_override and image_path_override.strip():
+            image_to_load = image_path_override
+        else:
+            image_to_load = image
+
+        image_path = folder_paths.get_annotated_filepath(image_to_load)
 
         try:
             with rawpy.imread(image_path) as raw:
