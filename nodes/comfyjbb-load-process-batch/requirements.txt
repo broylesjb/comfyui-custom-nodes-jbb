@@ -1,0 +1,3 @@
+# Optional, best-effort dependencies used by this node:
+rawpy
+pillow-heif
