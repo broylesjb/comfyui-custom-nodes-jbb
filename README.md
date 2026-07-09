@@ -57,7 +57,7 @@ Option A — Manual copy (simple)
    or on Linux/macOS (bash)
    cp -r nodes "$HOME/ComfyUI/custom_nodes/comfyui-custom-nodes-jbb"
 
-3. Ensure the copied folders (e.g. `comfyjbb-load-process-batch`, `comfyui-loadheicimagefrompath`, ...) are present inside `custom_nodes`.
+3. Ensure the copied folders (e.g. `comfyjbb_load_process_batch`, `comfyui_loadheicimagefrompath`, ...) are present inside `custom_nodes`.
 4. Install optional dependencies into the same Python environment used by ComfyUI (see Dependencies below).
 5. Restart ComfyUI — the new nodes should appear in the node list under their categories (see node README files for category names).
 

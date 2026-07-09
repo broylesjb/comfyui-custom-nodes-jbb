@@ -79,7 +79,7 @@ _node_helpers.save_image = lambda img, path: img.save(path)
 sys.modules["node_helpers"] = _node_helpers
 
 # Dynamically load the node module from its hyphenated folder and make imports resolvable
-_nodes_py = Path(__file__).resolve().parents[1] / "nodes" / "comfyjbb-load-process-batch" / "nodes.py"
+_nodes_py = Path(__file__).resolve().parents[1] / "nodes" / "comfyjbb_load_process_batch" / "nodes.py"
 spec = importlib.util.spec_from_file_location("comfyjbb_load_process_batch_nodes", str(_nodes_py))
 node_module = importlib.util.module_from_spec(spec)
 # ensure the node folder and repo root are importable (so imports like `import folder_paths`/`import node_helpers` work)
@@ -139,7 +139,7 @@ def test_process_non_image_bypassed(tmp_path: Path):
     assert images is None
 
 # --- Tests that use example HEIC and NEF files from the examples folder ---
-EXAMPLES_DIR = Path(__file__).resolve().parents[1] / "nodes" / "comfyjbb-load-process-batch" / "examples"
+EXAMPLES_DIR = Path(__file__).resolve().parents[1] / "nodes" / "comfyjbb_load_process_batch" / "examples"
 
 def test_process_heic_example(tmp_path: Path, monkeypatch):
     heic_path = EXAMPLES_DIR / "TEST.heic"
