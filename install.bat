@@ -18,10 +18,10 @@ echo Copying nodes to "%DEST%"
 mkdir "%DEST%" 2>NUL
 xcopy "%REPO_DIR%\nodes\*" "%DEST%\" /E /I /Y >nul
 
-IF EXIST "%REPO_DIR%\nodes\comfyjbb-load-process-batch\requirements.txt" (
+IF EXIST "%REPO_DIR%\nodes\\comfyjbb_load_process_batch\\requirements.txt" (
   echo Installing optional requirements for batch node...
   "%PYEXE%" -m pip install --upgrade pip
-  "%PYEXE%" -m pip install -r "%REPO_DIR%\nodes\comfyjbb-load-process-batch\requirements.txt"
+  "%PYEXE%" -m pip install -r "%REPO_DIR%\nodes\\comfyjbb_load_process_batch\\requirements.txt"
 )
 
 echo Done. Restart ComfyUI to load new custom nodes.

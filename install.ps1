@@ -9,7 +9,7 @@ Write-Host "Copying nodes to $CustomNodesDir"
 New-Item -ItemType Directory -Force -Path $CustomNodesDir | Out-Null
 Copy-Item -Path (Join-Path $RepoRoot 'nodes\*') -Destination $CustomNodesDir -Recurse -Force
 
-$req = Join-Path $RepoRoot 'nodes\comfyjbb-load-process-batch\requirements.txt'
+$req = Join-Path $RepoRoot 'nodes\\comfyjbb_load_process_batch\\requirements.txt'
 if (Test-Path $req) {
   Write-Host "Installing optional requirements using $PythonExe"
   & $PythonExe -m pip install --upgrade pip

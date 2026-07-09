@@ -1,5 +1,5 @@
 # Load Image (from path) custom node for ComfyUI
-# Package: comfyui-loadimagefrompath
+# Package: comfyui_loadimagefrompath
 # This nodes.py provides a LoadImageFromPath node that preserves core LoadImage behavior
 # and adds an optional `image_path` string to load arbitrary file paths. It also uses
 # a COMBO config matching the existing nodes in this repo (upload + refresh behavior).
