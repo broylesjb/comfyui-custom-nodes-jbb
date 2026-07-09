@@ -145,12 +145,5 @@ Contributions welcome. Please open issues or pull requests. If you add new nodes
 
 ## License
 
-This repository does not currently include a top-level LICENSE file. If you want to apply a license (MIT, Apache 2.0, etc.), add a LICENSE file at the repo root and update this README accordingly.
+See the top-level `LICENSE` file in this repository.
 
----
-
-If you'd like, I can commit this README update to the repository for you. Reply with exactly:
-
-please update the README and commit
-
-and I will push the change to the repository's default branch.
