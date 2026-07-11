@@ -140,7 +140,7 @@ class LoadAndProcessImageBatch(ComfyNodeABC):
                 "index": ("INT", {"default": 0, "min": 0}),
                 "seed": ("INT", {"default": 0}),
                 "label": (IO.STRING, {"default": ""}),
-                "dry_run": (IO.BOOL, {"default": False, "tooltip": "If true, do not move files; useful for testing."}),
+                "dry_run": ("BOOLEAN", {"default": False, "tooltip": "If true, do not move files; useful for testing."}),
             }
         }
 

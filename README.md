@@ -40,10 +40,11 @@ This README documents what is included in the repo, how the custom nodes work, i
 
 ### Package-root exported node names (ComfyUI discovery)
 
-When ComfyUI imports this repository root package, the following node keys are exported in `NODE_CLASS_MAPPINGS` (4 total):
+When ComfyUI imports this repository root package, the following node keys are exported in `NODE_CLASS_MAPPINGS` (5 total):
 
 - `LoadAndProcessImageBatch` — display: `COMFYJBB: Load & Process Image Batch` — category: `image/batch`
-- `LoadImagePlusHEIC` — display: `Load Image (HEIC)` — category: `image`
+- `JBB_LoadImagePlusHEIC` — display: `Load Image (HEIC) [JBB]` — category: `image` *(primary, collision-safe key)*
+- `LoadImagePlusHEIC` — display: `Load Image (HEIC)` — category: `image` *(backward-compat alias; may be shadowed by other HEIC packs)*
 - `LoadImageFromPath` — display: `Load Image (From Path optional)` — category: `image`
 - `Load Raw Image` — display: `Load Raw Image` — category: `image`
 
@@ -159,6 +160,33 @@ Note: tests mock ComfyUI internals so you do not need a running ComfyUI to run t
 - Node does not appear in ComfyUI UI after installation: Restart ComfyUI; verify the folder is inside `<ComfyUI>/custom_nodes/` and not nested incorrectly. ComfyUI 0.27.0+ requires a root-level `__init__.py` in the custom node directory — this repository includes one, so a direct git clone is sufficient.
 - ImportError / ModuleNotFoundError errors: Ensure optional dependencies are installed into the same Python environment that ComfyUI runs in.
 - Files are immediately moved to Bypass: Check the ComfyUI server logs — nodes will move files when optional loaders are missing or when a file extension isn't supported.
+
+**HEIC support — `pillow-heif` requirement**
+
+HEIC/HEIF image loading requires `pillow-heif` to be installed in the same Python environment that runs ComfyUI. Without it, HEIC files in the batch node are moved to the bypass folder, and the HEIC loader node raises a runtime error when an HEIC file is selected.
+
+Install it with:
+```bash
+python -m pip install pillow-heif
+```
+(Use the Python interpreter that ComfyUI runs with.)
+
+**Searching for nodes in the ComfyUI UI**
+
+All nodes from this package are prefixed with `COMFYJBB` in their display names, or marked with `[JBB]`. In the node search panel, search for any of:
+- `COMFYJBB` — finds the Load & Process Image Batch node
+- `Load Image (HEIC) [JBB]` or just `JBB` — finds the collision-safe HEIC loader
+- `Load Image (From Path` — finds the path-based image loader
+- `Load Raw Image` — finds the RAW camera image loader
+
+**Coexistence with other HEIC node packs (e.g. `comfyui-loadheicimage`)**
+
+This package exports **two keys** for the HEIC loader to protect visibility when another HEIC extension is also installed:
+
+- `JBB_LoadImagePlusHEIC` (display: `Load Image (HEIC) [JBB]`) — *collision-safe primary key*, unique to this package and always discoverable regardless of what other HEIC extensions are installed.
+- `LoadImagePlusHEIC` (display: `Load Image (HEIC)`) — *backward-compat alias*; if another installed extension registers the same key, load order determines which implementation wins (ComfyUI uses the first registration). Existing workflows saved with this key will continue to work if this package loads first or if no other extension registers the same key.
+
+If you have another HEIC extension installed and the `Load Image (HEIC)` node seems to belong to the wrong package, use `Load Image (HEIC) [JBB]` / key `JBB_LoadImagePlusHEIC` instead — that key is guaranteed to point to this package's implementation.
 
 ---
 

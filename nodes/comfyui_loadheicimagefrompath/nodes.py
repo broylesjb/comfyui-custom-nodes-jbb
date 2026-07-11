@@ -255,9 +255,11 @@ class LoadImagePlusHEIC:
 
 
 NODE_CLASS_MAPPINGS = {
-    "LoadImagePlusHEIC": LoadImagePlusHEIC,
+    "JBB_LoadImagePlusHEIC": LoadImagePlusHEIC,
+    "LoadImagePlusHEIC": LoadImagePlusHEIC,  # backward-compat alias; may collide with other HEIC packs
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "LoadImagePlusHEIC": "Load Image (HEIC)",
+    "JBB_LoadImagePlusHEIC": "Load Image (HEIC) [JBB]",
+    "LoadImagePlusHEIC": "Load Image (HEIC)",  # backward-compat alias
 }

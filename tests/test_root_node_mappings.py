@@ -88,6 +88,7 @@ def test_root_exports_all_expected_node_mappings(monkeypatch):
 
     expected_keys = {
         "LoadAndProcessImageBatch",
+        "JBB_LoadImagePlusHEIC",
         "LoadImagePlusHEIC",
         "LoadImageFromPath",
         "Load Raw Image",
@@ -95,4 +96,5 @@ def test_root_exports_all_expected_node_mappings(monkeypatch):
 
     assert set(module.NODE_CLASS_MAPPINGS.keys()) == expected_keys
     assert set(module.NODE_DISPLAY_NAME_MAPPINGS.keys()) == expected_keys
+    assert module.NODE_CLASS_MAPPINGS["JBB_LoadImagePlusHEIC"].__name__ == "LoadImagePlusHEIC"
     assert module.NODE_CLASS_MAPPINGS["LoadImagePlusHEIC"].__name__ == "LoadImagePlusHEIC"
