@@ -117,3 +117,4 @@ class LoadRawImage:
 
 
 NODE_CLASS_MAPPINGS = {"Load Raw Image": LoadRawImage}
+NODE_DISPLAY_NAME_MAPPINGS = {"Load Raw Image": "Load Raw Image"}

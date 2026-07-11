@@ -38,6 +38,29 @@ This README documents what is included in the repo, how the custom nodes work, i
   - Location: `nodes/nodes.py`
   - What it does: provides a mapping for the node class to display name and may expose the Load & Process Image Batch node at a top-level import path used by some installations.
 
+### Package-root exported node names (ComfyUI discovery)
+
+When ComfyUI imports this repository root package, the following node keys are exported in `NODE_CLASS_MAPPINGS` (4 total):
+
+- `LoadAndProcessImageBatch` — display: `COMFYJBB: Load & Process Image Batch` — category: `image/batch`
+- `LoadImagePlusHEIC` — display: `Load Image (HEIC)` — category: `image`
+- `LoadImageFromPath` — display: `Load Image (From Path optional)` — category: `image`
+- `Load Raw Image` — display: `Load Raw Image` — category: `image`
+
+Quick validation (inside the repo directory, using the same Python environment that runs ComfyUI):
+
+```bash
+python - <<'PY'
+import importlib.util, pathlib
+root = pathlib.Path(".").resolve()
+spec = importlib.util.spec_from_file_location("comfyui_custom_nodes_jbb", root / "__init__.py", submodule_search_locations=[str(root)])
+pkg = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(pkg)
+print("NODE_CLASS_MAPPINGS:", len(pkg.NODE_CLASS_MAPPINGS), sorted(pkg.NODE_CLASS_MAPPINGS))
+print("NODE_DISPLAY_NAME_MAPPINGS:", len(pkg.NODE_DISPLAY_NAME_MAPPINGS), sorted(pkg.NODE_DISPLAY_NAME_MAPPINGS))
+PY
+```
+
 ---
 
 ## Installation (recommended)
@@ -148,4 +171,3 @@ Contributions welcome. Please open issues or pull requests. If you add new nodes
 ## License
 
 See the top-level `LICENSE` file in this repository.
-
