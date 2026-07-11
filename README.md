@@ -71,6 +71,8 @@ Option B — Git clone into custom_nodes (recommended for easy updates)
 2. Install optional dependencies into the ComfyUI Python environment.
 3. Restart ComfyUI.
 
+   Note: ComfyUI 0.27.0+ loads custom nodes by importing the repository root as a Python package (via its `__init__.py`). This repository includes a root-level `__init__.py` that aggregates all node mappings, so a direct git clone into `custom_nodes/` is the recommended and fully supported install method.
+
 Option C — Development (symlink)
 - On Linux/macOS, you can create a symbolic link from the repo working directory to your ComfyUI `custom_nodes` folder so changes are picked up without re-copying.
 
@@ -131,7 +133,7 @@ Note: tests mock ComfyUI internals so you do not need a running ComfyUI to run t
 
 ## Troubleshooting
 
-- Node does not appear in ComfyUI UI after installation: Restart ComfyUI; verify the folder is inside `<ComfyUI>/custom_nodes/` and not nested incorrectly.
+- Node does not appear in ComfyUI UI after installation: Restart ComfyUI; verify the folder is inside `<ComfyUI>/custom_nodes/` and not nested incorrectly. ComfyUI 0.27.0+ requires a root-level `__init__.py` in the custom node directory — this repository includes one, so a direct git clone is sufficient.
 - ImportError / ModuleNotFoundError errors: Ensure optional dependencies are installed into the same Python environment that ComfyUI runs in.
 - Files are immediately moved to Bypass: Check the ComfyUI server logs — nodes will move files when optional loaders are missing or when a file extension isn't supported.
 
