@@ -20,7 +20,7 @@ class LoadRawImage:
 
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "load_img"
-    CATEGORY = "image"
+    CATEGORY = "COMFYJBB"
     DESCRIPTION = "Load a RAW image into ComfyUI."
 
     @classmethod
@@ -117,4 +117,4 @@ class LoadRawImage:
 
 
 NODE_CLASS_MAPPINGS = {"Load Raw Image": LoadRawImage}
-NODE_DISPLAY_NAME_MAPPINGS = {"Load Raw Image": "Load Raw Image"}
+NODE_DISPLAY_NAME_MAPPINGS = {"Load Raw Image": "COMFYJBB: Load Raw Image"}

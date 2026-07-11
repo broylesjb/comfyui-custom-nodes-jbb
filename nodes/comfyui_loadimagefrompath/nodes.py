@@ -45,7 +45,7 @@ class LoadImageFromPath(ComfyNodeABC):
             }
         }
 
-    CATEGORY = "image"
+    CATEGORY = "COMFYJBB"
     ESSENTIALS_CATEGORY = "Basics"
     SEARCH_ALIASES = ["load image", "open image", "import image", "image input", "upload image", "read image", "image loader"]
 
@@ -149,5 +149,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "LoadImageFromPath": "Load Image (From Path optional)",
+    "LoadImageFromPath": "COMFYJBB: Load Image (From Path optional)",
 }

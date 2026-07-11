@@ -140,7 +140,7 @@ class LoadAndProcessImageBatch(ComfyNodeABC):
 
     RETURN_TYPES = ("IMAGE", "STRING")
     FUNCTION = "process_next"
-    CATEGORY = "image/batch"
+    CATEGORY = "COMFYJBB"
     DESCRIPTION = "COMFYJBB: Load and process image batch queue; routes by extension to appropriate loaders, moves processed files to processed_path or bypass_path."
 
     def _normalize_paths(self, batch_path, processed_path, bypass_path):

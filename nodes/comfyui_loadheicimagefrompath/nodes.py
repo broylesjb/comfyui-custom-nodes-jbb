@@ -138,7 +138,7 @@ class LoadImagePlusHEIC:
             },
         }
 
-    CATEGORY = "image"
+    CATEGORY = "COMFYJBB"
 
     RETURN_TYPES = ("IMAGE", "MASK")
     FUNCTION = "load_image"
@@ -260,6 +260,6 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "JBB_LoadImagePlusHEIC": "Load Image (HEIC) [JBB]",
-    "LoadImagePlusHEIC": "Load Image (HEIC)",  # backward-compat alias
+    "JBB_LoadImagePlusHEIC": "COMFYJBB: Load Image (HEIC) [JBB]",
+    "LoadImagePlusHEIC": "COMFYJBB: Load Image (HEIC)",  # backward-compat alias
 }
